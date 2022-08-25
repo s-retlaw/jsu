@@ -135,7 +135,7 @@ fn run_cmd_line() -> Result<(), Box<dyn Error>>  {
             .long("extract")
             .takes_value(false)
             .action(clap::ArgAction::SetTrue)
-            .help("Scan the text looking for any embeded JSON objects and return them.  Will return an array if more than one."))
+            .help("Scan the text looking for any embeded JSON objects and return them.  Will return an array."))
         .get_matches();
 
     let input_file = matches.get_one::<String>("input_file");

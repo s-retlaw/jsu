@@ -76,3 +76,8 @@ Outputs:
   ]
 ]
 ```
+
+Note: Extract looks for {} or [] sequences. For an array [] it must have an element that is a json object.
+
+
+
