@@ -59,3 +59,20 @@ Outputs:
 ```
 
 ## To extract json segments from a larger text file
+
+'''echo 'some text {"a":1} more "text" [1,2,3] text [1,{"b":2}] text ' | jsu -x```
+
+Outputs:
+```
+[
+  {
+    "a": 1
+  },
+  [
+    1,
+    {
+      "b": 2
+    }
+  ]
+]
+```
