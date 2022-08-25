@@ -29,4 +29,33 @@ Output:
 
 ## To expand any json embedded strings in json
 
+```echo '{"a":"{\"a1\":1}","b":["{\"w\":2}"]}' | jsu```
+Outputs:
+```
+{
+  "a": "{\"a1\":1}",
+  "b": [
+    "{\"w\":2}"
+  ]
+}
+```
+
+adding the -e flag will expand the embeded strings:
+
+```echo '{"a":"{\"a1\":1}","b":["{\"w\":2}"]}' | jsu -e ```
+
+Outputs:
+```
+{
+  "a": {
+    "a1": 1
+  },
+  "b": [
+    {
+      "w": 2
+    }
+  ]
+}
+```
+
 ## To extract json segments from a larger text file
