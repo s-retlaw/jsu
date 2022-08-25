@@ -1,4 +1,4 @@
-use std::{time::Instant, error::Error};
+use std::error::Error;
 use serde_json::{Deserializer, Value};
 use clap::{App, Arg};
 use std::io;
@@ -78,15 +78,14 @@ fn expand_json_value(js : Value) -> Value{
     }
 }
 
-
 fn get_input(file_name : Option<&String>) -> Result<String, Box<dyn Error>> {
     Ok(match file_name {
         Some(name) => {
-            std::fs::read_to_string(name)?
+            std::fs::read_to_string(name).map_err(|e| format!("Error reading input file {name} : {e}"))?
         },
         None => {
             let mut input = String::new();
-            io::stdin().read_to_string(&mut input)?;
+            io::stdin().read_to_string(&mut input).map_err(|e| format!("Error reading from stdin : {e}"))?;
             input
         }
     })
@@ -104,9 +103,9 @@ fn write_output(output_file : Option<&String>, data: &str) -> Result<(), Box<dyn
     Ok(())
 }
 
-fn main() -> Result<(), Box<dyn Error>>  {
+fn run_cmd_line() -> Result<(), Box<dyn Error>>  {
     let matches = App::new("jsu")
-        .version("0.1.0")
+        .version("0.2.0")
         .author("Walter Szewelanczyk")
         .about("Json Utils")
         .arg(Arg::new("input_file")
@@ -144,36 +143,28 @@ fn main() -> Result<(), Box<dyn Error>>  {
     let compact = *matches.get_one::<bool>("compact").unwrap();
     let expand = *matches.get_one::<bool>("expand").unwrap();
     let extract = *matches.get_one::<bool>("extract").unwrap();
-    
-    // println!("file : {:?}", input_file.is_some());
-    // println!("output : {:?}", output_file.is_some());
-    // println!("compact : {compact}");
-    // println!("expand : {expand}");
-    // println!("extract : {extract}");
-    //
-    let _start = Instant::now();
-    
+
     let input = get_input(input_file)?;
     let mut json = if extract { 
-        extract_json_objects(&input) 
+        extract_json_objects(&input)
     }else{
-        serde_json::from_str::<Value>(&input)?
+        serde_json::from_str::<Value>(&input).map_err(|e| format!("Error parsing JSON : {e}"))?
     };
     if expand {
         json = expand_json_value(json);
     }
     let output = if compact{
-        serde_json::to_string(&json)?
+        serde_json::to_string(&json).map_err(|e| format!("Error converting JSON to a compact string : {e}"))?
     }else{
-        serde_json::to_string_pretty(&json)?
+        serde_json::to_string_pretty(&json).map_err(|e| format!("Error converting JSON to a string : {e}"))?
     };
-    write_output(output_file, &output)?;
-     
-
-    //  let data = "{\"k\": 3}1\"cool\"\"stuff\" 3{}  [1,2,3] [0, {\"w\":1}, {\"r\":1}, 2] then some {\"a\": 1, \"b\": [1,2], \"c\":{\"c1\":123a}";
-    // 
-    // println!("---------------------------------------------------");
-    // println!("The total time was {:?}", start.elapsed());
-
+    write_output(output_file, &output).map_err(|e| format!("Error writing to output : {e}"))?;
     Ok(())
+}
+
+
+fn main(){
+    if let Err(e) = run_cmd_line() {
+        eprintln!("{}", e)
+    }
 }
