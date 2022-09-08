@@ -105,7 +105,7 @@ fn write_output(output_file : Option<&String>, data: &str) -> Result<(), Box<dyn
 
 fn run_cmd_line() -> Result<(), Box<dyn Error>>  {
     let matches = App::new("jsu")
-        .version("0.2.0")
+        .version("0.3.0")
         .author("Walter Szewelanczyk")
         .about("Json Utils")
         .arg(Arg::new("input_file")
@@ -136,6 +136,11 @@ fn run_cmd_line() -> Result<(), Box<dyn Error>>  {
             .takes_value(false)
             .action(clap::ArgAction::SetTrue)
             .help("Scan the text looking for any embeded JSON objects and return them.  Will return an array."))
+        .arg(Arg::new("wrap")
+            .short('w')
+            .long("wrap")
+            .help("Wrap the json with a new top level property.")
+            .takes_value(true))
         .get_matches();
 
     let input_file = matches.get_one::<String>("input_file");
@@ -143,6 +148,7 @@ fn run_cmd_line() -> Result<(), Box<dyn Error>>  {
     let compact = *matches.get_one::<bool>("compact").unwrap();
     let expand = *matches.get_one::<bool>("expand").unwrap();
     let extract = *matches.get_one::<bool>("extract").unwrap();
+    let wrap = matches.get_one::<String>("wrap");
 
     let input = get_input(input_file)?;
     let mut json = if extract { 
@@ -152,6 +158,9 @@ fn run_cmd_line() -> Result<(), Box<dyn Error>>  {
     };
     if expand {
         json = expand_json_value(json);
+    }
+    if let Some(prop_name) = wrap {
+        json = serde_json::json!({prop_name : json});
     }
     let output = if compact{
         serde_json::to_string(&json).map_err(|e| format!("Error converting JSON to a compact string : {e}"))?

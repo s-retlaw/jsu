@@ -77,7 +77,27 @@ Outputs:
 ]
 ```
 
-Note: Extract looks for {} or [] sequences. For an array [] it must have an element that is a json object.
+Note: Extract looks for {} or [] sequences. For an array [] it must have an element that is a json object.  Also note the output is not standard json.  use the -w to wrap in a top level property.
 
+
+## To wrap the json in a new top level property
+'''echo 'some text {"a":1} more "text" [1,2,3] text [1,{"b":2}] text ' | jsu -x -w extracted```
+
+Outputs:
+```
+{
+  "extracted": [
+    {
+      "a": 1
+    },
+    [
+      1,
+      {
+        "b": 2
+      }
+    ]
+  ]
+}
+```
 
 
